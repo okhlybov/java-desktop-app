@@ -34,7 +34,7 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
-        //new Runner();
+        System.out.println(new Runner());
         launch();
     }
 
