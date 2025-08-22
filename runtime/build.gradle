@@ -10,6 +10,10 @@ dependencies {
 
 jlink {
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    // Have to set this explicitly due to https://github.com/beryx/badass-jlink-plugin/issues/290
+    customImage {
+        appModules = ['app.cli', 'app.javafx']
+    }
     launcher {
         name = 'app'
         noConsole = false
