@@ -34,7 +34,7 @@ jlink {
     }
 }
 
-// Workaround for stray files slipping into the image; this is ought to be fixed in the org.beryx.jlink plugin
+// Workaround for stray files slipping into the image; this is ought to be fixed in the org.beryx.jlink plugin, refer to https://github.com/beryx/badass-jlink-plugin/issues/51
 task sanitizeImage(type: Delete) {
     delete "$buildDir/image/app"
 }
