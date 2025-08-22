@@ -15,51 +15,21 @@ jlink {
     }
     launcher {
         name = 'app'
-        noConsole = false
+        noConsole = false // For CLI app
         mainClass = 'app.cli.Main'
         moduleName = 'app.cli'
     }
     secondaryLauncher {
         name = 'appfx'
-        noConsole = true
+        noConsole = true // For GUI app
+        winConsole = false // Override jpackage's --win-console behavior for a GUI app
         mainClass = 'app.javafx.Main'
         moduleName = 'app.javafx'
         jvmArgs = ['-Xmx256m']
     }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import org.gradle.jvm.toolchain.JavaLanguageVersion
-
-// Define the toolchain you are interested in
-def toolchainSpec = javaToolchains.launcherFor {
-    languageVersion.set(JavaLanguageVersion.of(17)) // Specify the desired Java version
-}
-
-// Access the resolved toolchain's installation path
-tasks.register('printToolchainPath') {
-    doLast {
-        def launcher = toolchainSpec.get() // Resolve the launcher
-        def installationPath = launcher.metadata.installationPath
-        println("Toolchain installation path: $installationPath")
+    jpackage {
+        if (org.gradle.internal.os.OperatingSystem.current().windows) {
+            imageOptions = ['--win-console'] // Set default console option for primary launcher, which is a console app on Windows
+        }
     }
 }
-
-
-
-
-
