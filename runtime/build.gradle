@@ -15,17 +15,18 @@ jlink {
         appModules = ['app.cli', 'app.javafx']
     }
     launcher {
-        name = 'app'
-        noConsole = false
-        mainClass = 'app.cli.Main'
-        moduleName = 'app.cli'
-    }
-    secondaryLauncher {
         name = 'appfx'
         noConsole = true
         mainClass = 'app.javafx.Main'
         moduleName = 'app.javafx'
         jvmArgs = ['-Xmx256m']
+    }
+    secondaryLauncher {
+        name = 'app'
+        noConsole = false
+		winConsole = true
+        mainClass = 'app.cli.Main'
+        moduleName = 'app.cli'
     }
 }
 
