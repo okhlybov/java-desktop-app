@@ -28,8 +28,14 @@ jlink {
         jvmArgs = ['-Xmx256m']
     }
     jpackage {
-        if (org.gradle.internal.os.OperatingSystem.current().windows) {
+        if(org.gradle.internal.os.OperatingSystem.current().windows) {
             imageOptions = ['--win-console'] // Set default console option for primary launcher, which is a console app on Windows
         }
     }
 }
+
+// Workaround for stray files slipping into the image; this is ought to be fixed in the org.beryx.jlink plugin
+task sanitizeImage(type: Delete) {
+    delete "$buildDir/image/app"
+}
+sanitizeImage.shouldRunAfter jlink
