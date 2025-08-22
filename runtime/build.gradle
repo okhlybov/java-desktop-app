@@ -10,23 +10,21 @@ dependencies {
 
 jlink {
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
-    // Have to set this explicitly due to https://github.com/beryx/badass-jlink-plugin/issues/290
     customImage {
-        appModules = ['app.cli', 'app.javafx']
+        appModules = ['app.cli', 'app.javafx'] // Have to set this explicitly due to https://github.com/beryx/badass-jlink-plugin/issues/290
     }
     launcher {
+        name = 'app'
+        noConsole = false
+        mainClass = 'app.cli.Main'
+        moduleName = 'app.cli'
+    }
+    secondaryLauncher {
         name = 'appfx'
         noConsole = true
         mainClass = 'app.javafx.Main'
         moduleName = 'app.javafx'
         jvmArgs = ['-Xmx256m']
-    }
-    secondaryLauncher {
-        name = 'app'
-        noConsole = false
-		winConsole = true
-        mainClass = 'app.cli.Main'
-        moduleName = 'app.cli'
     }
 }
 
