@@ -1,0 +1,13 @@
+plugins {
+    id 'buildlogic.java-common-conventions'
+    id 'org.openjfx.javafxplugin'
+}
+
+repositories {
+    gradlePluginPortal()
+}
+
+javafx {
+    version = '17.0.16'
+    modules = ['javafx.controls', 'javafx.fxml']
+}
