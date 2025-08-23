@@ -43,4 +43,7 @@ jlink {
 task sanitizeImage(type: Delete) {
     delete "$buildDir/image" // The stem should match the app name
 }
-sanitizeImage.shouldRunAfter jlink
+
+tasks.named('jlink') {
+    finalizedBy('sanitizeImage')
+}
