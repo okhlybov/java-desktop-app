@@ -1,6 +1,7 @@
 plugins {
     id 'buildlogic.javafx-common-conventions'
     id 'org.beryx.jlink'
+	id 'com.google.osdetector'
 }
 
 dependencies {
@@ -41,9 +42,18 @@ jlink {
 // See https://github.com/beryx/badass-jlink-plugin/issues/51
 
 task sanitizeImage(type: Delete) {
-    delete "$buildDir/image" // The stem should match the app name
+    file("$buildDir/image/app").deleteDir() // The stem should match the app name
 }
 
 tasks.named('jlink') {
     finalizedBy('sanitizeImage')
+}
+
+task release(type: Exec) {
+	dependsOn('jpackageImage')
+	switch("${osdetector.os}.${osdetector.arch}") {
+		case 'windows.x86_64':
+			commandLine 'cmd.exe', '/c', 'iscc.cmd', "${osdetector.arch}.iss",
+			"/DMyPackageName=app", "/DMyAppName=App", "/DMyAppVersion=${version}", "/DMyPlatform=${osdetector.arch}"
+	}
 }
