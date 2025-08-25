@@ -1,40 +1,40 @@
 plugins {
-    id 'buildlogic.javafx-common-conventions'
-    id 'org.beryx.jlink'
+  id 'buildlogic.javafx-common-conventions'
+  id 'org.beryx.jlink'
 	id 'com.google.osdetector'
 }
 
 dependencies {
-    implementation project(':app-cli')
-    implementation project(':app-javafx')
+  implementation project(':app-cli')
+  implementation project(':app-javafx')
 }
 
 jlink {
-    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
-    customImage {
-        appModules = ['app.cli', 'app.javafx'] // Have to set this explicitly due to https://github.com/beryx/badass-jlink-plugin/issues/290
+  options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+  customImage {
+    appModules = ['app.cli', 'app.javafx'] // Have to set this explicitly due to https://github.com/beryx/badass-jlink-plugin/issues/290
+  }
+  launcher {
+    name = 'app'
+    noConsole = false // For CLI app
+    mainClass = 'app.cli.Main'
+    moduleName = 'app.cli'
+  }
+  secondaryLauncher {
+    name = 'appfx'
+    noConsole = true // For GUI app
+    winConsole = false // Override jpackage's --win-console behavior for a GUI app
+    mainClass = 'app.javafx.Main'
+    moduleName = 'app.javafx'
+    jvmArgs = ['-Xmx256m']
+  }
+  jpackage {
+    if(org.gradle.internal.os.OperatingSystem.current().windows) {
+      imageOptions = ['--win-console'] // Set default console option for primary launcher, which is a console app on Windows
+      installerType = 'msi'
+      installerOptions = ['--type', 'msi', '--app-version', project.version, '--win-menu']
     }
-    launcher {
-        name = 'app'
-        noConsole = false // For CLI app
-        mainClass = 'app.cli.Main'
-        moduleName = 'app.cli'
-    }
-    secondaryLauncher {
-        name = 'appfx'
-        noConsole = true // For GUI app
-        winConsole = false // Override jpackage's --win-console behavior for a GUI app
-        mainClass = 'app.javafx.Main'
-        moduleName = 'app.javafx'
-        jvmArgs = ['-Xmx256m']
-    }
-    jpackage {
-        if(org.gradle.internal.os.OperatingSystem.current().windows) {
-            imageOptions = ['--win-console'] // Set default console option for primary launcher, which is a console app on Windows
-            installerType = 'msi'
-            installerOptions = ['--type', 'msi', '--app-version', project.version, '--win-menu']
-        }
-    }
+  }
 }
 
 // Workaround for stray files slipping into the image
@@ -42,36 +42,37 @@ jlink {
 // See https://github.com/beryx/badass-jlink-plugin/issues/51
 
 task sanitizeImage(type: Delete) {
-    file("$buildDir/image/app").deleteDir() // The stem should match the app name
+  file("$buildDir/image/app").deleteDir() // The stem should match the app name
 }
 
 tasks.named('jlink') {
-    finalizedBy('sanitizeImage')
+  finalizedBy('sanitizeImage')
 }
 
 task releaseWinX64(type: Exec) {
-    dependsOn 'jpackageImage'
-    commandLine 'cmd.exe', '/c', 'iscc.cmd', "${osdetector.arch}.iss",
-        "/DMyPackageName=app", "/DMyAppName=App", "/DMyAppVersion=${version}", "/DMyPlatform=${osdetector.arch}"
+  dependsOn 'jpackageImage'
+  commandLine 'cmd.exe', '/c', 'iscc.cmd', "${osdetector.arch}.iss",
+    "/DMyPackageName=app", "/DMyAppName=App", "/DMyAppVersion=${version}", "/DMyPlatform=${osdetector.arch}"
 }
 
 task releaseAppImage(type: Exec) {
-    dependsOn 'prepareAppImage'
-    println("$buildDir/jpackage/app")
-    commandLine 'sh', '-c', '~/opt/appimagetool', 'build/jpackage/app', "build/release/app-${osdetector.arch}-${version}.AppImage"
+  dependsOn 'prepareAppImage'
+  commandLine 'sh', '-c', 'appimagetool', 'build/jpackage/app', "build/release/app-${osdetector.arch}-${version}.AppImage"
 }
 
 task prepareAppImage(type: Copy) {
-    dependsOn 'jpackageImage'
-    from 'appimage'; into "$buildDir/jpackage/app"
+  dependsOn 'jpackageImage'
+  from 'appimage'; into "$buildDir/jpackage/app"
 }
 
 task release {
 	switch("${osdetector.os}.${osdetector.arch}") {
 		case 'windows.x86_64':
-            dependsOn 'releaseWinX64'
-        case 'linux.x86_64':
-            dependsOn 'releaseAppImage'
+      dependsOn 'releaseWinX64'
+      break
+    case 'linux.x86_64':
+      dependsOn 'releaseAppImage'
+      break
 	}
 }
 

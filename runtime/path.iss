@@ -1,5 +1,5 @@
 // PATH management extension for the Inno Setup installer generatior
-// Version: 1.0
+// Version: 1.1
 // Author: Oleg A. Khlybov <fougas@mail.ru>
 // Homepage: https://github.com/okhlybov/isx
 // License: 3-clause BSD
@@ -113,12 +113,18 @@ begin
   RegWriteStringValue(HKCU, 'Environment', 'PATH', MergePaths(paths));
 end;
 
+procedure LocateRegistry(var root: Integer; var entry: String);
+begin
+  if IsAdminInstallMode then root := HKLM else root := HKCU;
+  entry := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{#emit SetupSetting("AppId")}_is1');
+end;
+
 procedure InstallPaths(s: TSetupStep);
 var
   uninstaller: String;
+  root: Integer;
   paths: Paths;
 begin
-  uninstaller := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{#emit SetupSetting("AppId")}_is1');
   if s = ssInstall then begin
     RegisterPaths;
     // Construct system-wide paths
@@ -140,8 +146,9 @@ begin
     JoinPaths(addUsr, preUsr);
     JoinPaths(addUsr, postUsr);
   end else if s = ssPostInstall then begin
-      RegWriteStringValue(HKLM, uninstaller, 'AddedSystemPaths', MergePaths(addSys)); // Remember added system paths
-      RegWriteStringValue(HKLM, uninstaller, 'AddedUserPaths', MergePaths(addUsr)); // Remember added user paths
+    LocateRegistry(root, uninstaller);
+    RegWriteStringValue(root, uninstaller, 'AddedSystemPaths', MergePaths(addSys)); // Remember added system paths
+    RegWriteStringValue(root, uninstaller, 'AddedUserPaths', MergePaths(addUsr)); // Remember added user paths
   end;
 end;
 
@@ -164,12 +171,13 @@ end;
 
 procedure RevertPaths(s: TUninstallStep);
 var
+  root: Integer;
   path, uninstaller: String;
   paths, usrPaths, sysPaths: Paths;
 begin
-  uninstaller := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{#emit SetupSetting("AppId")}_is1');
   path := '';
-  RegQueryStringValue(HKLM, uninstaller, 'AddedSystemPaths', path);
+  LocateRegistry(root, uninstaller);
+  RegQueryStringValue(root, uninstaller, 'AddedSystemPaths', path);
   if path <> '' then begin
     sysPaths := SplitPaths(path);
     paths := GetSysPaths;
@@ -177,7 +185,7 @@ begin
     SetSysPaths(paths);
   end;
   path := '';
-  RegQueryStringValue(HKLM, uninstaller, 'AddedUserPaths', path);
+  RegQueryStringValue(root, uninstaller, 'AddedUserPaths', path);
   if path <> '' then begin
     usrPaths := SplitPaths(path);
     paths := GetUsrPaths;
@@ -193,5 +201,5 @@ end;
 
 procedure CurUninstallStepChanged(s: TUninstallStep);
 begin
-  RevertPaths(s);  { Include this call upon rolling out the custom CurUninstallStepChanged() procedure }
+  if s = usUninstall then RevertPaths(s); { Include this call upon rolling out the custom CurUninstallStepChanged() procedure }
 end;
