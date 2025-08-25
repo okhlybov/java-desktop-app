@@ -49,11 +49,29 @@ tasks.named('jlink') {
     finalizedBy('sanitizeImage')
 }
 
-task release(type: Exec) {
-	dependsOn('jpackageImage')
+task releaseWinX64(type: Exec) {
+    dependsOn 'jpackageImage'
+    commandLine 'cmd.exe', '/c', 'iscc.cmd', "${osdetector.arch}.iss",
+        "/DMyPackageName=app", "/DMyAppName=App", "/DMyAppVersion=${version}", "/DMyPlatform=${osdetector.arch}"
+}
+
+task releaseAppImage(type: Exec) {
+    dependsOn 'prepareAppImage'
+    println("$buildDir/jpackage/app")
+    commandLine 'sh', '-c', '~/opt/appimagetool', 'build/jpackage/app', "build/release/app-${osdetector.arch}-${version}.AppImage"
+}
+
+task prepareAppImage(type: Copy) {
+    dependsOn 'jpackageImage'
+    from 'appimage'; into "$buildDir/jpackage/app"
+}
+
+task release {
 	switch("${osdetector.os}.${osdetector.arch}") {
 		case 'windows.x86_64':
-			commandLine 'cmd.exe', '/c', 'iscc.cmd', "${osdetector.arch}.iss",
-			"/DMyPackageName=app", "/DMyAppName=App", "/DMyAppVersion=${version}", "/DMyPlatform=${osdetector.arch}"
+            dependsOn 'releaseWinX64'
+        case 'linux.x86_64':
+            dependsOn 'releaseAppImage'
 	}
 }
+
