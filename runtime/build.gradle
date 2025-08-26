@@ -42,7 +42,7 @@ jlink {
 // See https://github.com/beryx/badass-jlink-plugin/issues/51
 
 task sanitizeImage(type: Delete) {
-    file("$buildDir/image/app").deleteDir() // The stem should match the app name
+    file('build/image/app').deleteDir() // The stem should match the app name
 }
 
 tasks.named('jlink') {
@@ -58,13 +58,13 @@ task releaseWinX64(type: Exec) {
 
 task releaseAppImage(type: Exec) {
     dependsOn 'prepareRelease'
-    dependsOn 'prepareAppImage'
-    commandLine 'sh', 'appimagetool.sh', "$buildDir/jpackage/app", "$buildDir/release/app-${osdetector.os}.${osdetector.arch}-${version}.AppImage"
+    dependsOn 'copyAppImageFiles'
+    commandLine 'sh', 'appimagetool.sh', 'build/jpackage/app', "build/release/app-${osdetector.os}.${osdetector.arch}-${version}.AppImage"
 }
 
-task prepareAppImage(type: Copy) {
+task copyAppImageFiles(type: Copy) {
     dependsOn 'jpackageImage'
-    from 'appimage'; into "$buildDir/jpackage/app"
+    from 'appimage'; into 'build/jpackage/app'
 }
 
 task release {
@@ -79,5 +79,15 @@ task release {
 }
 
 task prepareRelease {
-    mkdir "$buildDir/release"
+    dependsOn 'createReadme'
+    mkdir 'build/release'
+}
+
+import org.apache.tools.ant.filters.*
+
+task createReadme(type: Copy) {
+    from 'README.in'
+    into 'build/jpackage/app'
+    rename { 'README' }
+    filter(ReplaceTokens, tokens: [VERSION: project.version.toString()])
 }
