@@ -78,9 +78,16 @@ task release {
 	}
 }
 
+task createDirs {
+    mustRunAfter clean
+    doLast {
+        mkdir 'build/release'
+    }
+}
+
 task prepareRelease {
+    dependsOn 'createDirs'
     dependsOn 'createReadme'
-    mkdir 'build/release'
 }
 
 import org.apache.tools.ant.filters.*
