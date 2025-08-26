@@ -14,6 +14,7 @@ Compression=lzma2/max
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableFinishedPage=yes
+InfoAfterFile=README
 MinVersion=10.0
 OutputBaseFilename={#MyPackageName}-{#MyPlatform}-{#MyAppVersion}
 OutputDir=..\..\release

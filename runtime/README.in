@@ -7,9 +7,9 @@ This is a sample multi-interface command-line and GUI Java application.
 * Windows
 
 Run `app` or `appfx` in a windows terminal for CLI or GUI version, respectively.
-Run `App` from the Start menu for GUI version.
+Run `App` from the Windows' Start menu for the GUI version.
 
 * Linux
 
-_Make the `.AppImage` file is made executable with `chmod +x *.AppImage`._
-Run an integrated `AppImage` executable for the CLI version and `AppImage -g` for the GUI version.
+_Make the `.AppImage` file is made executable with `chmod +x .AppImage`._
+Run an integrated `.AppImage` executable for the CLI version and `.AppImage -g` for the GUI version.
