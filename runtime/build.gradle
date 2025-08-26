@@ -50,14 +50,16 @@ tasks.named('jlink') {
 }
 
 task releaseWinX64(type: Exec) {
+    dependsOn 'prepareRelease'
     dependsOn 'jpackageImage'
     commandLine 'cmd.exe', '/c', 'iscc.cmd', "${osdetector.arch}.iss",
         "/DMyPackageName=app", "/DMyAppName=App", "/DMyAppVersion=${version}", "/DMyPlatform=${osdetector.arch}"
 }
 
 task releaseAppImage(type: Exec) {
+    dependsOn 'prepareRelease'
     dependsOn 'prepareAppImage'
-    commandLine 'sh', '-c', 'appimagetool', 'build/jpackage/app', "build/release/app-${osdetector.arch}-${version}.AppImage"
+    commandLine 'sh', 'appimagetool.sh', "$buildDir/jpackage/app", "$buildDir/release/app-${osdetector.os}.${osdetector.arch}-${version}.AppImage"
 }
 
 task prepareAppImage(type: Copy) {
@@ -76,3 +78,6 @@ task release {
 	}
 }
 
+task prepareRelease {
+    mkdir "$buildDir/release"
+}
