@@ -70,11 +70,18 @@ task release {
     }
 }
 
-task sanitizeImage(type: Delete) {
-    mustRunAfter 'jpackageImage'
+tasks.named('jlink') {
     doLast {
-        // Get rid of the jlink/jpackage -dumped thrash in the app directory
-        project.delete fileTree('build/jpackage/app/lib/app').matching {
+        // Get rid of the buggy jlink -injected thrash
+        project.delete 'build/image/app'
+    }
+}
+
+tasks.named('jpackageImage') {
+    doLast {
+        // Get rid of the buggy jpackage -injected thrash
+        def roots = [linux: 'build/jpackage/app/lib/app', windows: 'build/jpackage/app/runtime/app']
+        project.delete fileTree(roots[osdetector.os]).matching {
             exclude '*.xml'
             exclude '*.cfg'
         }
@@ -89,7 +96,6 @@ task createDirs {
 }
 
 task prepareRelease {
-    dependsOn 'sanitizeImage'
     dependsOn 'createDirs'
     dependsOn 'createReadme'
     dependsOn 'copyLicense'
