@@ -60,35 +60,39 @@ task copyAppImageFiles(type: Copy) {
 }
 
 task release {
-	switch("${osdetector.os}.${osdetector.arch}") {
-		case 'windows.x86_64':
+    switch("${osdetector.os}.${osdetector.arch}") {
+        case 'windows.x86_64':
             dependsOn 'releaseWinX64'
             break
         case 'linux.x86_64':
             dependsOn 'releaseAppImage'
             break
-	}
+    }
 }
 
 task sanitizeImage(type: Delete) {
-	mustRunAfter 'jlink'
-	doLast {
-		delete 'build/image/app'
-	}
+    mustRunAfter 'jpackageImage'
+    doLast {
+        // Get rid of the jlink/jpackage -dumped thrash in the app directory
+        project.delete fileTree('build/jpackage/app/lib/app').matching {
+            exclude '*.xml'
+            exclude '*.cfg'
+        }
+    }
 }
 
 task createDirs {
     mustRunAfter 'clean'
     doLast {
-        mkdir 'build/release'
+        project.mkdir 'build/release'
     }
 }
 
 task prepareRelease {
-	dependsOn 'sanitizeImage'
+    dependsOn 'sanitizeImage'
     dependsOn 'createDirs'
     dependsOn 'createReadme'
-	dependsOn 'copyLicense'
+    dependsOn 'copyLicense'
 }
 
 import org.apache.tools.ant.filters.*
@@ -96,7 +100,7 @@ import org.apache.tools.ant.filters.*
 task createReadme(type: Copy) {
     from 'README.in'
     into 'build/jpackage/app'
-    rename { 'README' }
+    rename {'README'}
     filter(ReplaceTokens, tokens: [VERSION: project.version.toString()])
 }
 
