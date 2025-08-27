@@ -41,23 +41,15 @@ jlink {
 // This was supposed to be fixed in the org.beryx.jlink plugin, yet it seems to persist
 // See https://github.com/beryx/badass-jlink-plugin/issues/51
 
-task sanitizeImage(type: Delete) {
-    file('build/image/app').deleteDir() // The stem should match the app name
-}
-
-tasks.named('jlink') {
-    finalizedBy('sanitizeImage')
-}
-
 task releaseWinX64(type: Exec) {
     dependsOn 'prepareRelease'
     dependsOn 'jpackageImage'
-    commandLine 'cmd.exe', '/c', 'iscc.cmd', "${osdetector.arch}.iss",
-        "/DMyPackageName=app", "/DMyAppName=App", "/DMyAppVersion=${version}", "/DMyPlatform=${osdetector.arch}"
+    commandLine 'cmd.exe', '/c', 'iscc.cmd', "${osdetector.arch}.iss", "/DMyAppVersion=${version}"
 }
 
 task releaseAppImage(type: Exec) {
     dependsOn 'prepareRelease'
+    dependsOn 'jpackageImage'
     dependsOn 'copyAppImageFiles'
     commandLine 'sh', 'appimagetool.sh', 'build/jpackage/app', "build/release/app-${osdetector.os}.${osdetector.arch}-${version}.AppImage"
 }
@@ -78,16 +70,25 @@ task release {
 	}
 }
 
+task sanitizeImage(type: Delete) {
+	mustRunAfter 'jlink'
+	doLast {
+		delete 'build/image/app'
+	}
+}
+
 task createDirs {
-    mustRunAfter clean
+    mustRunAfter 'clean'
     doLast {
         mkdir 'build/release'
     }
 }
 
 task prepareRelease {
+	dependsOn 'sanitizeImage'
     dependsOn 'createDirs'
     dependsOn 'createReadme'
+	dependsOn 'copyLicense'
 }
 
 import org.apache.tools.ant.filters.*
@@ -97,4 +98,8 @@ task createReadme(type: Copy) {
     into 'build/jpackage/app'
     rename { 'README' }
     filter(ReplaceTokens, tokens: [VERSION: project.version.toString()])
+}
+
+task copyLicense(type: Copy) {
+    from '../LICENSE'; into 'build/jpackage/app'
 }

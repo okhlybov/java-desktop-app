@@ -31,7 +31,7 @@ winget install --id JRSoftware.InnoSetup -e -s winget -i
 ### Obtain this project's source
 
 ```shell
-git clone https://github.com/okhlybov/java-app-sample
+git clone https://github.com/okhlybov/java-desktop-app
 ```
 
 ### Get into the source directory and execute
