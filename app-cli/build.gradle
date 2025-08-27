@@ -4,10 +4,16 @@ plugins {
 }
 
 dependencies {
+    implementation 'info.picocli:picocli:4.7.7'
+    annotationProcessor 'info.picocli:picocli-codegen:4.7.7'
     implementation project(':app')
 }
 
 application {
     mainClass = 'app.cli.Main'
     mainModule = 'app.cli'
+}
+
+compileJava {
+    options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
 }
