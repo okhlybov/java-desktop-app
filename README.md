@@ -16,11 +16,16 @@ It is intended to be a starting point for a custom project which can be derived 
 ## Prerequisites
 
 * Java 17+ runtime
-* Inno Setup compiler (_Windows_)
 
-The above Java runtime should be capable of just running the Gradle wrapper; the rest of the toolchain (including platform-specific parts) will be downloaded and configured automagically. If no Java runtime is installed, an [Adoptium Temurin](https://adoptium.net/temurin/releases/?version=17) runtime is a solid choice.
+The above Java runtime should be capable of just running the Gradle wrapper; the rest of the toolchain
+(including platform-specific parts) will be downloaded and configured automagically.
+If no Java runtime is installed, an [Adoptium Temurin](https://adoptium.net/temurin/releases/?version=17)
+runtime is a solid choice.
 
-Note that Inno Setup compiler so far can not be obtained automagically and thus should be downloaded and installed [manually](https://jrsoftware.org/isdl.php) or through WinGet
+Provided build scripts locate and use locally installed AppImage and Inno Setup tools and make an attempt to
+download and install them if not found.
+
+The Inno Setup compiler can also be installed [manually](https://jrsoftware.org/isdl.php) or through WinGet
 
 ```shell
 winget install --id JRSoftware.InnoSetup -e -s winget -i
