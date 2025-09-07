@@ -1,6 +1,6 @@
 # Java desktop application: from zero to hero
 
-This is a Java project representing complete build pipeline from ***source code*** all the way to ***platform-specific installer***.
+This is a Java project representing complete build workflow from ***source code*** all the way to ***platform-specific installer***.
 
 It is intended to be a starting point for a custom project which can be derived through gradual refactoring.
 
@@ -15,9 +15,9 @@ It is intended to be a starting point for a custom project which can be derived 
 
 ## Prerequisites
 
-* Java 17+ runtime
+* Java 17+ JDK
 
-The above Java runtime should be capable of just running the Gradle wrapper; the rest of the toolchain
+The above Java development kit should be capable of just running the Gradle wrapper; the rest of the toolchain
 (including platform-specific parts) will be downloaded and configured automagically.
 If no Java runtime is installed, an [Adoptium Temurin](https://adoptium.net/temurin/releases/?version=17)
 runtime is a solid choice.
@@ -41,13 +41,13 @@ git clone https://github.com/okhlybov/java-desktop-app
 
 ### Get into the source directory and execute
 
-(_Linux_)
+__Linux__
 
 ```shell
 sh gradlew clean release
 ```
 
-(_Windows_)
+__Windows__
 
 ```shell
 gradlew.bat clean release
@@ -56,3 +56,35 @@ gradlew.bat clean release
 ### Grab system-specific installer
 
 The build artifacts are placed into the `runtime/build/release` directory.
+
+## WSL2 host
+
+Issue the following command to (likely) solve permissions problems in the Linux container should they arise
+
+```shell
+echo -e '\n[automount]\nenabled = true\noptions = "metadata,umask=22,fmask=11"'  | sudo tee -a /etc/wsl.conf > /dev/null
+```
+
+After that, shutdown the WSL subsystem
+
+```cmd
+wsl --shutdown
+```
+
+__Arch Linux__
+
+```shell
+pacman -Syu jdk-openjdk binutils sudo fuse2
+```
+
+__Debian Linux__
+
+```shell
+sudo apt-get install default-jdk binutils curl file fuse libfuse2
+```
+
+__?Ubuntu Linux?__
+
+```shell
+sudo apt-get install default-jdk binutils curl libfuse2t64
+```
